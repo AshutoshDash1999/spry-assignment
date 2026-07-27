@@ -1,15 +1,58 @@
 "use client"
 
-import { useMemo, useState } from "react"
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination"
 import { products } from "@/lib/products"
+import { useRouter, useSearchParams } from "next/navigation"
+import { useEffect, useMemo, useState } from "react"
 import { FilterSortBar } from "./_components/FilterSortBar"
 import { ProductCard } from "./_components/ProductCard"
 
+const ITEMS_PER_PAGE = 8
+
 export default function Page() {
+  const router = useRouter()
+  const searchParams = useSearchParams()
   const [favorites, setFavorites] = useState<Set<number>>(new Set())
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedRating, setSelectedRating] = useState("All")
   const [sortBy, setSortBy] = useState<"asc" | "desc">("asc")
+  const [currentPage, setCurrentPage] = useState(1)
+
+  useEffect(() => {
+    const pageParam = searchParams.get("page")
+    const categoryParam = searchParams.get("category")
+    const ratingParam = searchParams.get("rating")
+    const sortParam = searchParams.get("sort")
+
+    if (pageParam) setCurrentPage(parseInt(pageParam) || 1)
+    if (categoryParam) setSelectedCategory(categoryParam)
+    if (ratingParam) setSelectedRating(ratingParam)
+    if (sortParam) setSortBy((sortParam as "asc" | "desc") || "asc")
+  }, [searchParams])
+
+  const updateUrl = (
+    page?: number,
+    category?: string,
+    rating?: string,
+    sort?: "asc" | "desc"
+  ) => {
+    const params = new URLSearchParams()
+    if (page && page > 1) params.set("page", page.toString())
+    if (category) params.set("category", category)
+    if (rating && rating !== "All") params.set("rating", rating)
+    if (sort && sort !== "asc") params.set("sort", sort)
+
+    const url = params.toString() ? `?${params.toString()}` : "/"
+    router.push(url)
+  }
 
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products
@@ -43,15 +86,24 @@ export default function Page() {
   }
 
   const handleCategoryChange = (category: string | null) => {
-    setSelectedCategory(category ?? "")
+    const newCategory = category ?? ""
+    setSelectedCategory(newCategory)
+    setCurrentPage(1)
+    updateUrl(1, newCategory, selectedRating, sortBy)
   }
 
   const handleRatingChange = (rating: string | null) => {
-    setSelectedRating(rating ?? "All")
+    const newRating = rating ?? "All"
+    setSelectedRating(newRating)
+    setCurrentPage(1)
+    updateUrl(1, selectedCategory, newRating, sortBy)
   }
 
   const handleSortChange = (sort: "asc" | "desc" | null) => {
-    setSortBy(sort ?? "asc")
+    const newSort = sort ?? "asc"
+    setSortBy(newSort)
+    setCurrentPage(1)
+    updateUrl(1, selectedCategory, selectedRating, newSort)
   }
 
   return (
@@ -68,23 +120,43 @@ export default function Page() {
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-6">
           <h1 className="text-3xl font-bold">Products</h1>
-          <p className="mt-1 text-muted-foreground">
-            Showing {filteredAndSortedProducts.length} of {products.length}{" "}
-            products
-          </p>
         </div>
 
         {filteredAndSortedProducts.length > 0 ? (
-          <div className="grid gap-6 grid-cols-[repeat(auto-fill,minmax(250px,1fr))]">
-            {filteredAndSortedProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                isFavorited={favorites.has(product.id)}
-                onToggleFavorite={toggleFavorite}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">
+              {filteredAndSortedProducts
+                .slice(
+                  (currentPage - 1) * ITEMS_PER_PAGE,
+                  currentPage * ITEMS_PER_PAGE
+                )
+                .map((product) => (
+                  <ProductCard
+                    key={product.id}
+                    product={product}
+                    isFavorited={favorites.has(product.id)}
+                    onToggleFavorite={toggleFavorite}
+                  />
+                ))}
+            </div>
+
+            {Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE) >
+              1 && (
+              <div className="mt-8">
+                <PaginationComponent
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(
+                    filteredAndSortedProducts.length / ITEMS_PER_PAGE
+                  )}
+                  onPageChange={(page) => {
+                    setCurrentPage(page)
+                    updateUrl(page, selectedCategory, selectedRating, sortBy)
+                    window.scrollTo({ top: 0, behavior: "smooth" })
+                  }}
+                />
+              </div>
+            )}
+          </>
         ) : (
           <div className="rounded-lg border border-border bg-card p-8 text-center">
             <p className="text-muted-foreground">No products found.</p>
@@ -92,5 +164,104 @@ export default function Page() {
         )}
       </main>
     </div>
+  )
+}
+
+function PaginationComponent({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number
+  totalPages: number
+  onPageChange: (page: number) => void
+}) {
+  const getPageNumbers = () => {
+    const pages = []
+    const maxVisible = 5
+
+    if (totalPages <= maxVisible) {
+      for (let i = 1; i <= totalPages; i++) {
+        pages.push(i)
+      }
+    } else {
+      pages.push(1)
+
+      const startPage = Math.max(2, currentPage - 1)
+      const endPage = Math.min(totalPages - 1, currentPage + 1)
+
+      if (startPage > 2) {
+        pages.push("...")
+      }
+
+      for (let i = startPage; i <= endPage; i++) {
+        pages.push(i)
+      }
+
+      if (endPage < totalPages - 1) {
+        pages.push("...")
+      }
+
+      pages.push(totalPages)
+    }
+
+    return pages
+  }
+
+  return (
+    <Pagination>
+      <PaginationContent>
+        <PaginationItem>
+          <PaginationPrevious
+            href="#"
+            onClick={(e) => {
+              e.preventDefault()
+              if (currentPage > 1) {
+                onPageChange(currentPage - 1)
+              }
+            }}
+            className={
+              currentPage === 1 ? "pointer-events-none opacity-50" : ""
+            }
+          />
+        </PaginationItem>
+
+        {getPageNumbers().map((page, idx) => (
+          <PaginationItem key={idx}>
+            {page === "..." ? (
+              <PaginationEllipsis />
+            ) : (
+              <PaginationLink
+                href="#"
+                isActive={currentPage === page}
+                onClick={(e) => {
+                  e.preventDefault()
+                  if (typeof page === "number") {
+                    onPageChange(page)
+                  }
+                }}
+              >
+                {page}
+              </PaginationLink>
+            )}
+          </PaginationItem>
+        ))}
+
+        <PaginationItem>
+          <PaginationNext
+            href="#"
+            onClick={(e) => {
+              e.preventDefault()
+              if (currentPage < totalPages) {
+                onPageChange(currentPage + 1)
+              }
+            }}
+            className={
+              currentPage === totalPages ? "pointer-events-none opacity-50" : ""
+            }
+          />
+        </PaginationItem>
+      </PaginationContent>
+    </Pagination>
   )
 }

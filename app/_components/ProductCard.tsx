@@ -1,9 +1,9 @@
 "use client"
 
+import { Card, CardContent } from "@/components/ui/card"
 import { Product } from "@/lib/products"
 import { IconHeart } from "@tabler/icons-react"
 import Image from "next/image"
-import { Card, CardContent } from "@/components/ui/card"
 
 interface ProductCardProps {
   product: Product
@@ -17,7 +17,7 @@ export function ProductCard({
   onToggleFavorite,
 }: ProductCardProps) {
   return (
-    <Card className="group overflow-hidden transition-shadow hover:shadow-lg">
+    <Card className="group overflow-hidden pt-0 transition-shadow hover:shadow-lg">
       <div className="relative aspect-square overflow-hidden bg-muted">
         <Image
           src={product.image}
