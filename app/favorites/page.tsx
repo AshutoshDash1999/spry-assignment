@@ -1,38 +1,60 @@
 "use client"
 
-import { ProductCard } from "../_components/ProductCard"
 import { products } from "@/lib/products"
 import { useFavoritesStore } from "@/lib/store"
-import { useMemo, useState } from "react"
+import { useState } from "react"
+import { FilterSortBar } from "../_components/FilterSortBar"
+import { ProductCard } from "../_components/ProductCard"
 
 export default function FavoritesPage() {
   const favorites = useFavoritesStore((state) => state.favorites)
   const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite)
+  const [selectedCategory, setSelectedCategory] = useState("")
+  const [selectedRating, setSelectedRating] = useState("All")
   const [sortBy, setSortBy] = useState<"asc" | "desc">("asc")
 
-  const favoriteProducts = useMemo(() => {
-    const fav = products.filter((p) => favorites.has(p.id))
-    fav.sort((a, b) => (sortBy === "asc" ? a.price - b.price : b.price - a.price))
-    return fav
-  }, [favorites, sortBy])
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category ?? "")
+  }
+
+  const handleRatingChange = (rating: string | null) => {
+    setSelectedRating(rating ?? "All")
+  }
+
+  const handleSortChange = (sort: string | null) => {
+    setSortBy((sort as "asc" | "desc") ?? "asc")
+  }
+
+  let favoriteProducts = products.filter((p) => favorites.has(p.id))
+
+  if (selectedCategory) {
+    favoriteProducts = favoriteProducts.filter(
+      (p) => p.category === selectedCategory
+    )
+  }
+
+  if (selectedRating !== "All") {
+    const minRating = parseFloat(selectedRating)
+    favoriteProducts = favoriteProducts.filter((p) => p.rating >= minRating)
+  }
+
+  favoriteProducts.sort((a, b) =>
+    sortBy === "asc" ? a.price - b.price : b.price - a.price
+  )
 
   return (
     <div className="min-h-svh bg-background">
+      <FilterSortBar
+        selectedCategory={selectedCategory}
+        selectedRating={selectedRating}
+        sortBy={sortBy}
+        onCategoryChange={handleCategoryChange}
+        onRatingChange={handleRatingChange}
+        onSortChange={handleSortChange}
+      />
+
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
-        <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Favorites</h1>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-medium">Sort by price:</label>
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as "asc" | "desc")}
-              className="rounded border border-input bg-background px-2 py-1 text-sm"
-            >
-              <option value="asc">Low to High</option>
-              <option value="desc">High to Low</option>
-            </select>
-          </div>
-        </div>
+        <h1 className="mb-4 text-3xl font-bold">Favorites</h1>
 
         {favoriteProducts.length > 0 ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(250px,1fr))] gap-6">

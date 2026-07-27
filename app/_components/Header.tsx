@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { IconHeart } from "@tabler/icons-react"
+import { IconHeart, IconShoppingBag } from "@tabler/icons-react"
 import { usePathname } from "next/navigation"
 
 export function Header() {
@@ -18,12 +18,13 @@ export function Header() {
           <nav className="flex items-center gap-6">
             <Link
               href="/"
-              className={`transition-colors ${
+              className={`flex items-center gap-2 transition-colors ${
                 !isFavoritesPage
                   ? "text-foreground font-medium"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
+              <IconShoppingBag size={20} />
               Products
             </Link>
             <Link
