@@ -2,6 +2,7 @@
 
 import { Geist_Mono, Inter } from "next/font/google"
 
+import { Footer } from "@/app/_components/Footer"
 import { Header } from "@/app/_components/Header"
 import { TodoHeader } from "@/app/todo/_components/TodoHeader"
 import { ThemeProvider } from "@/components/theme-provider"
@@ -36,11 +37,14 @@ export default function RootLayout({
         inter.variable
       )}
     >
-      <body>
+      <body className="flex flex-col min-h-screen">
         <ThemeProvider>
           <Toaster />
-          {isTodoPage ? <TodoHeader /> : <Header />}
-          {children}
+          <div className="flex-1">
+            {isTodoPage ? <TodoHeader /> : <Header />}
+            {children}
+          </div>
+          <Footer />
         </ThemeProvider>
       </body>
     </html>
