@@ -1,8 +1,11 @@
 "use client"
 
+import { zodResolver } from "@hookform/resolvers/zod"
 import { IconCalendar } from "@tabler/icons-react"
 import { format, parseISO, startOfDay } from "date-fns"
-import * as React from "react"
+import { useState } from "react"
+import { useForm } from "react-hook-form"
+import { z } from "zod"
 
 import { Button } from "@/components/ui/button"
 import { Calendar } from "@/components/ui/calendar"
@@ -33,18 +36,20 @@ import { TASK_STATUSES, type Task, type TaskStatus } from "@/lib/task-store"
 import { cn } from "@/lib/utils"
 import { toast } from "react-hot-toast"
 
+const taskFormSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().default(""),
+  status: z.enum(["Pending", "In Progress", "Completed"]),
+  dueDate: z.string().min(1, "Due date is required"),
+})
+
+type TaskFormValues = z.infer<typeof taskFormSchema>
+
 interface TaskFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   task?: Task
   onSubmit: (values: Omit<Task, "id">) => void
-}
-
-const emptyForm = {
-  title: "",
-  description: "",
-  status: "Pending" as TaskStatus,
-  dueDate: "",
 }
 
 export function TaskFormDialog({
@@ -76,45 +81,38 @@ interface TaskFormProps {
 }
 
 function TaskForm({ task, onSubmit, onOpenChange }: TaskFormProps) {
-  const [title, setTitle] = React.useState(task?.title ?? emptyForm.title)
-  const [description, setDescription] = React.useState(
-    task?.description ?? emptyForm.description
-  )
-  const [status, setStatus] = React.useState<TaskStatus>(
-    task?.status ?? emptyForm.status
-  )
-  const [dueDate, setDueDate] = React.useState(
-    task?.dueDate ?? emptyForm.dueDate
-  )
-  const [errors, setErrors] = React.useState<{
-    title?: string
-    dueDate?: string
-  }>({})
-  const [datePickerOpen, setDatePickerOpen] = React.useState(false)
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isDirty },
+  } = useForm<TaskFormValues>({
+    resolver: zodResolver(taskFormSchema),
+    defaultValues: {
+      title: task?.title ?? "",
+      description: task?.description ?? "",
+      status: task?.status ?? "Pending",
+      dueDate: task?.dueDate ?? "",
+    },
+  })
 
+  const dueDate = watch("dueDate")
+  const [datePickerOpen, setDatePickerOpen] = useState(false)
   const today = startOfDay(new Date())
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-
-    const nextErrors: { title?: string; dueDate?: string } = {}
-    if (!title.trim()) nextErrors.title = "Title is required"
-    if (!dueDate) nextErrors.dueDate = "Due date is required"
-
-    if (Object.keys(nextErrors).length > 0) {
-      setErrors(nextErrors)
-      return
-    }
-
-    onSubmit({ title: title.trim(), description, status, dueDate })
+  const onFormSubmit = (data: TaskFormValues) => {
+    onSubmit(data)
     onOpenChange(false)
     toast.success(
-      `Task "${title.trim()}" ${task ? "updated" : "added"} successfully`
+      `Task "${data.title}" ${task ? "updated" : "added"} successfully`
     )
   }
 
+  const isSubmitDisabled = task ? !isDirty : false
+
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="flex flex-col gap-5">
       <DialogHeader>
         <DialogTitle>{task ? "Edit Task" : "Add Task"}</DialogTitle>
         <DialogDescription>
@@ -128,13 +126,12 @@ function TaskForm({ task, onSubmit, onOpenChange }: TaskFormProps) {
         <Label htmlFor="task-title">Title</Label>
         <Input
           id="task-title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          {...register("title")}
           aria-invalid={!!errors.title}
           placeholder="e.g. Write project proposal"
         />
         {errors.title && (
-          <p className="text-sm text-destructive">{errors.title}</p>
+          <p className="text-sm text-destructive">{errors.title.message}</p>
         )}
       </div>
 
@@ -142,8 +139,7 @@ function TaskForm({ task, onSubmit, onOpenChange }: TaskFormProps) {
         <Label htmlFor="task-description">Description</Label>
         <Textarea
           id="task-description"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
+          {...register("description")}
           placeholder="Add more detail (optional)"
         />
       </div>
@@ -152,8 +148,8 @@ function TaskForm({ task, onSubmit, onOpenChange }: TaskFormProps) {
         <div className="flex flex-col gap-2">
           <Label htmlFor="task-status">Status</Label>
           <Select
-            value={status}
-            onValueChange={(value) => value && setStatus(value as TaskStatus)}
+            value={watch("status")}
+            onValueChange={(value) => setValue("status", value as TaskStatus)}
           >
             <SelectTrigger id="task-status" className="w-full">
               <SelectValue />
@@ -196,7 +192,7 @@ function TaskForm({ task, onSubmit, onOpenChange }: TaskFormProps) {
                 selected={dueDate ? parseISO(dueDate) : undefined}
                 onSelect={(date) => {
                   if (!date) return
-                  setDueDate(format(date, "yyyy-MM-dd"))
+                  setValue("dueDate", format(date, "yyyy-MM-dd"))
                   setDatePickerOpen(false)
                 }}
                 disabled={{ before: today }}
@@ -206,7 +202,7 @@ function TaskForm({ task, onSubmit, onOpenChange }: TaskFormProps) {
             </PopoverContent>
           </Popover>
           {errors.dueDate && (
-            <p className="text-sm text-destructive">{errors.dueDate}</p>
+            <p className="text-sm text-destructive">{errors.dueDate.message}</p>
           )}
         </div>
       </div>
@@ -219,7 +215,9 @@ function TaskForm({ task, onSubmit, onOpenChange }: TaskFormProps) {
         >
           Cancel
         </Button>
-        <Button type="submit">{task ? "Save Changes" : "Add Task"}</Button>
+        <Button type="submit" disabled={isSubmitDisabled}>
+          {task ? "Save Changes" : "Add Task"}
+        </Button>
       </DialogFooter>
     </form>
   )
