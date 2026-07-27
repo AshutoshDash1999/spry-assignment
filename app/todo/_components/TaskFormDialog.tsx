@@ -1,27 +1,26 @@
 "use client"
 
-import * as React from "react"
-import { format, parseISO, startOfDay } from "date-fns"
 import { IconCalendar } from "@tabler/icons-react"
+import { format, parseISO, startOfDay } from "date-fns"
+import * as React from "react"
 
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
   DialogDescription,
   DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import {
   Popover,
-  PopoverTrigger,
   PopoverContent,
+  PopoverTrigger,
 } from "@/components/ui/popover"
-import { Calendar } from "@/components/ui/calendar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Label } from "@/components/ui/label"
 import {
   Select,
   SelectContent,
@@ -29,8 +28,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { cn } from "@/lib/utils"
+import { Textarea } from "@/components/ui/textarea"
 import { TASK_STATUSES, type Task, type TaskStatus } from "@/lib/task-store"
+import { cn } from "@/lib/utils"
+import { toast } from "react-hot-toast"
 
 interface TaskFormDialogProps {
   open: boolean
@@ -107,6 +108,9 @@ function TaskForm({ task, onSubmit, onOpenChange }: TaskFormProps) {
 
     onSubmit({ title: title.trim(), description, status, dueDate })
     onOpenChange(false)
+    toast.success(
+      `Task "${title.trim()}" ${task ? "updated" : "added"} successfully`
+    )
   }
 
   return (

@@ -7,6 +7,7 @@ import { useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { useTaskStore, type Task, type TaskStatus } from "@/lib/task-store"
+import { toast } from "react-hot-toast"
 import { DeleteTaskDialog } from "./_components/DeleteTaskDialog"
 import { TaskCard } from "./_components/TaskCard"
 import { TaskFilterSortBar } from "./_components/TaskFilterSortBar"
@@ -63,6 +64,7 @@ export default function TodoPage() {
   const handleConfirmDelete = (task: Task) => {
     deleteTask(task.id)
     setDeletingTask(null)
+    toast.error(`Task "${task.title}" deleted`)
   }
 
   const filteredAndSortedTasks = useMemo(() => {
