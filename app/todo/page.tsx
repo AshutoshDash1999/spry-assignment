@@ -1,16 +1,24 @@
 "use client"
 
-import { useMemo, useState } from "react"
-import { compareAsc, parseISO } from "date-fns"
 import { IconClipboardList } from "@tabler/icons-react"
+import { compareAsc, parseISO } from "date-fns"
+import { motion } from "motion/react"
+import { useMemo, useState } from "react"
 
 import { Button } from "@/components/ui/button"
 import { useTaskStore, type Task, type TaskStatus } from "@/lib/task-store"
-import { TaskSummary } from "./_components/TaskSummary"
-import { TaskFilterSortBar } from "./_components/TaskFilterSortBar"
-import { TaskCard } from "./_components/TaskCard"
-import { TaskFormDialog } from "./_components/TaskFormDialog"
 import { DeleteTaskDialog } from "./_components/DeleteTaskDialog"
+import { TaskCard } from "./_components/TaskCard"
+import { TaskFilterSortBar } from "./_components/TaskFilterSortBar"
+import { TaskFormDialog } from "./_components/TaskFormDialog"
+import { TaskSummary } from "./_components/TaskSummary"
+
+const container = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.08 },
+  },
+}
 
 export default function TodoPage() {
   const tasks = useTaskStore((s) => s.tasks)
@@ -67,7 +75,7 @@ export default function TodoPage() {
   }, [tasks, selectedStatus, sortBy])
 
   return (
-    <div className="min-h-svh bg-background">
+    <div className="bg-background">
       <TaskFilterSortBar
         selectedStatus={selectedStatus}
         sortBy={sortBy}
@@ -99,7 +107,12 @@ export default function TodoPage() {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <motion.div
+            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3"
+            variants={container}
+            initial="hidden"
+            animate="show"
+          >
             {filteredAndSortedTasks.map((task) => (
               <TaskCard
                 key={task.id}
@@ -108,7 +121,7 @@ export default function TodoPage() {
                 onDelete={setDeletingTask}
               />
             ))}
-          </div>
+          </motion.div>
         )}
       </main>
 

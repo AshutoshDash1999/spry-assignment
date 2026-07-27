@@ -1,5 +1,6 @@
 "use client"
 
+import { motion } from "motion/react"
 import { IconCalendar, IconPencil, IconTrash } from "@tabler/icons-react"
 import { format, isBefore, parseISO, startOfDay } from "date-fns"
 
@@ -30,13 +31,23 @@ const statusBadgeVariant: Record<
   Completed: "completed",
 }
 
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: "easeOut" },
+  },
+} as const
+
 export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
   const isOverdue =
     task.status !== "Completed" &&
     isBefore(parseISO(task.dueDate), startOfDay(new Date()))
 
   return (
-    <Card className="h-full transition-shadow hover:ring-foreground/20">
+    <motion.div variants={item}>
+      <Card className="h-full transition-shadow hover:ring-foreground/20">
       <div className="flex h-full flex-col justify-between gap-2">
         <div>
           <CardHeader>
@@ -89,5 +100,6 @@ export function TaskCard({ task, onEdit, onDelete }: TaskCardProps) {
         </CardFooter>
       </div>
     </Card>
+    </motion.div>
   )
 }
