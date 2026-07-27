@@ -2,11 +2,11 @@
 
 import Link from "next/link"
 import { IconHeart } from "@tabler/icons-react"
-import { useSearchParams } from "next/navigation"
+import { usePathname } from "next/navigation"
 
 export function Header() {
-  const searchParams = useSearchParams()
-  const isFavoritesPage = searchParams.get("view") === "favorites"
+  const pathname = usePathname()
+  const isFavoritesPage = pathname === "/favorites"
 
   return (
     <header className="border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -27,7 +27,7 @@ export function Header() {
               Products
             </Link>
             <Link
-              href="/?view=favorites"
+              href="/favorites"
               className={`flex items-center gap-2 transition-colors ${
                 isFavoritesPage
                   ? "text-foreground font-medium"

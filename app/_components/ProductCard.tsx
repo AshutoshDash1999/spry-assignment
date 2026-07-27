@@ -1,11 +1,12 @@
 "use client"
 
-import { useState } from "react"
-import { motion } from "motion/react"
+import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Product } from "@/lib/products"
 import { IconHeart } from "@tabler/icons-react"
+import { motion } from "motion/react"
 import Image from "next/image"
+import { useState } from "react"
 
 interface ProductCardProps {
   product: Product
@@ -20,12 +21,11 @@ export function ProductCard({
   onToggleFavorite,
   index = 0,
 }: ProductCardProps) {
-  const [isAnimating, setIsAnimating] = useState(false)
+  const [isHeartAnimating, setIsHeartAnimating] = useState(false)
 
   const handleHeartClick = () => {
+    setIsHeartAnimating(true)
     onToggleFavorite(product.id)
-    setIsAnimating(true)
-    setTimeout(() => setIsAnimating(false), 600)
   }
 
   return (
@@ -45,43 +45,24 @@ export function ProductCard({
             fill
             className="object-cover transition-transform group-hover:scale-105"
           />
-          <motion.button
-            onClick={handleHeartClick}
-            className="absolute top-3 right-3 rounded-full bg-white/90 p-2 transition-colors hover:bg-white"
-            aria-label={
-              isFavorited ? "Remove from favorites" : "Add to favorites"
-            }
-            animate={
-              isAnimating
-                ? {
-                    scale: [1, 1.2, 0.95, 1.1, 1],
-                  }
-                : {}
-            }
-            transition={{
-              duration: 0.6,
-              ease: "easeInOut",
-            }}
+          <motion.div
+            animate={isHeartAnimating ? { scale: [1, 0.8, 1.2, 1] } : { scale: 1 }}
+            transition={{ duration: 0.3 }}
+            onAnimationComplete={() => setIsHeartAnimating(false)}
+            className="absolute top-2 right-2"
           >
-            <motion.div
-              animate={
-                isAnimating
-                  ? {
-                      rotate: [0, -15, 15, -15, 0],
-                    }
-                  : {}
-              }
-              transition={{
-                duration: 0.6,
-                ease: "easeInOut",
-              }}
+            <Button
+              variant="outline"
+              size="icon"
+              className="backdrop-blur-3xl"
+              onClick={handleHeartClick}
             >
               <IconHeart
                 size={20}
                 className={isFavorited ? "fill-red-500 stroke-red-500" : ""}
               />
-            </motion.div>
-          </motion.button>
+            </Button>
+          </motion.div>
         </div>
         <CardContent className="pt-4">
           <p className="text-xs font-medium text-muted-foreground uppercase">
@@ -89,7 +70,9 @@ export function ProductCard({
           </p>
           <h3 className="mt-2 line-clamp-2 font-semibold">{product.name}</h3>
           <div className="mt-3 flex items-center justify-between">
-            <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
+            <span className="text-lg font-bold">
+              ${product.price.toFixed(2)}
+            </span>
             <div className="flex items-center gap-1">
               <span className="text-sm font-medium">{product.rating}</span>
               <span className="text-sm text-muted-foreground">★</span>

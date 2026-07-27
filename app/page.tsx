@@ -10,6 +10,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination"
 import { products } from "@/lib/products"
+import { useFavoritesStore } from "@/lib/store"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { FilterSortBar } from "./_components/FilterSortBar"
@@ -20,12 +21,12 @@ const ITEMS_PER_PAGE = 8
 export default function Page() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [favorites, setFavorites] = useState<Set<number>>(new Set())
+  const favorites = useFavoritesStore((state) => state.favorites)
+  const toggleFavorite = useFavoritesStore((state) => state.toggleFavorite)
   const [selectedCategory, setSelectedCategory] = useState("")
   const [selectedRating, setSelectedRating] = useState("All")
   const [sortBy, setSortBy] = useState<"asc" | "desc">("asc")
   const [currentPage, setCurrentPage] = useState(1)
-  const viewMode = searchParams.get("view") || "products"
 
   useEffect(() => {
     const pageParam = searchParams.get("page")
@@ -56,15 +57,13 @@ export default function Page() {
   }
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = viewMode === "favorites"
-      ? products.filter((p) => favorites.has(p.id))
-      : products
+    let filtered = products
 
-    if (selectedCategory && viewMode !== "favorites") {
+    if (selectedCategory) {
       filtered = filtered.filter((p) => p.category === selectedCategory)
     }
 
-    if (selectedRating !== "All" && viewMode !== "favorites") {
+    if (selectedRating !== "All") {
       const minRating = parseFloat(selectedRating)
       filtered = filtered.filter((p) => p.rating >= minRating)
     }
@@ -74,19 +73,8 @@ export default function Page() {
     })
 
     return filtered
-  }, [selectedCategory, selectedRating, sortBy, viewMode, favorites])
+  }, [selectedCategory, selectedRating, sortBy])
 
-  const toggleFavorite = (id: number) => {
-    setFavorites((prev) => {
-      const next = new Set(prev)
-      if (next.has(id)) {
-        next.delete(id)
-      } else {
-        next.add(id)
-      }
-      return next
-    })
-  }
 
   const handleCategoryChange = (category: string | null) => {
     const newCategory = category ?? ""
@@ -111,22 +99,18 @@ export default function Page() {
 
   return (
     <div className="min-h-svh bg-background">
-      {viewMode !== "favorites" && (
-        <FilterSortBar
-          selectedCategory={selectedCategory}
-          selectedRating={selectedRating}
-          sortBy={sortBy}
-          onCategoryChange={handleCategoryChange}
-          onRatingChange={handleRatingChange}
-          onSortChange={handleSortChange}
-        />
-      )}
+      <FilterSortBar
+        selectedCategory={selectedCategory}
+        selectedRating={selectedRating}
+        sortBy={sortBy}
+        onCategoryChange={handleCategoryChange}
+        onRatingChange={handleRatingChange}
+        onSortChange={handleSortChange}
+      />
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">
-            {viewMode === "favorites" ? "Favorites" : "Products"}
-          </h1>
+          <h1 className="text-3xl font-bold">Products</h1>
         </div>
 
         {filteredAndSortedProducts.length > 0 ? (
