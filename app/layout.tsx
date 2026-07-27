@@ -1,9 +1,13 @@
+"use client"
+
 import { Geist_Mono, Inter } from "next/font/google"
 
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/app/_components/Header"
-import { cn } from "@/lib/utils";
+import { TodoHeader } from "@/app/todo/_components/TodoHeader"
+import { cn } from "@/lib/utils"
+import { usePathname } from "next/navigation";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'})
 
@@ -17,6 +21,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
+  const pathname = usePathname()
+  const isTodoPage = pathname === "/todo"
+
   return (
     <html
       lang="en"
@@ -25,7 +32,7 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <Header />
+          {isTodoPage ? <TodoHeader /> : <Header />}
           {children}
         </ThemeProvider>
       </body>

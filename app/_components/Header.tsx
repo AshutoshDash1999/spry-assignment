@@ -14,6 +14,7 @@ export function Header() {
   const pathname = usePathname()
   const router = useRouter()
   const isFavoritesPage = pathname === "/favorites"
+  const isProductsPage = pathname === "/"
 
   const handleAppChange = (value: string | null) => {
     if (value) router.push(value)
@@ -26,11 +27,11 @@ export function Header() {
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold">Spry</span>
             <Select
-              value={pathname === "/todo" ? "/todo" : "/"}
+              value="/"
               onValueChange={handleAppChange}
             >
               <SelectTrigger className="h-auto w-fit gap-1 border-0 px-4 py-2 hover:opacity-80">
-                <span>{pathname === "/todo" ? "Todo" : "Ecommerce"}</span>
+                <span>Ecommerce</span>
               </SelectTrigger>
               <SelectContent className="z-50">
                 <SelectItem value="/">Ecommerce</SelectItem>
@@ -42,7 +43,7 @@ export function Header() {
             <Link
               href="/"
               className={`flex items-center gap-2 transition-colors ${
-                !isFavoritesPage
+                isProductsPage
                   ? "font-medium text-foreground"
                   : "text-muted-foreground hover:text-foreground"
               }`}
