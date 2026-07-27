@@ -59,8 +59,8 @@ Feature-rich product browsing experience with filtering, sorting, and favorites 
 
 | Project | Status | URL |
 |---------|--------|-----|
-| Task Dashboard | ![Status Badge] | [Live Demo](#) |
-| E-Commerce | ![Status Badge] | [Live Demo](#) |
+| Task Dashboard | ![Status Badge] | [Live Demo](https://spry-assignment.netlify.app/) |
+| E-Commerce | ![Status Badge] | [Live Demo](https://spry-assignment.netlify.app/) |
 
 ## Setup
 

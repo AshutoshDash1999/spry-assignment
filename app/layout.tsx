@@ -1,14 +1,8 @@
-"use client"
-
+import { Metadata } from "next"
 import { Geist_Mono, Inter } from "next/font/google"
 
-import { Footer } from "@/app/_components/Footer"
-import { Header } from "@/app/_components/Header"
-import { TodoHeader } from "@/app/todo/_components/TodoHeader"
-import { ThemeProvider } from "@/components/theme-provider"
+import { LayoutClient } from "@/app/_components/LayoutClient"
 import { cn } from "@/lib/utils"
-import { usePathname } from "next/navigation"
-import { Toaster } from "react-hot-toast"
 import "./globals.css"
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
@@ -18,14 +12,41 @@ const fontMono = Geist_Mono({
   variable: "--font-mono",
 })
 
+export const metadata: Metadata = {
+  title: "Todo App - Manage Your Tasks Efficiently",
+  description:
+    "A modern task management application to organize, track, and complete your daily tasks with ease.",
+  keywords: ["todo", "task management", "productivity", "task tracker"],
+  authors: [{ name: "Ashutosh Dash" }],
+  openGraph: {
+    title: "Todo App - Manage Your Tasks Efficiently",
+    description:
+      "A modern task management application to organize, track, and complete your daily tasks with ease.",
+    type: "website",
+    locale: "en_US",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Todo App - Manage Your Tasks Efficiently",
+    description:
+      "A modern task management application to organize, track, and complete your daily tasks with ease.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 5,
+  },
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  const pathname = usePathname()
-  const isTodoPage = pathname === "/todo"
-
   return (
     <html
       lang="en"
@@ -37,16 +58,7 @@ export default function RootLayout({
         inter.variable
       )}
     >
-      <body className="flex flex-col min-h-screen">
-        <ThemeProvider>
-          <Toaster />
-          <div className="flex-1">
-            {isTodoPage ? <TodoHeader /> : <Header />}
-            {children}
-          </div>
-          <Footer />
-        </ThemeProvider>
-      </body>
+      <LayoutClient>{children}</LayoutClient>
     </html>
   )
 }
