@@ -1,14 +1,5 @@
 "use client"
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
 import { products } from "@/lib/products"
 import { useFavoritesStore } from "@/lib/store"
 import { useRouter, useSearchParams } from "next/navigation"
@@ -16,6 +7,7 @@ import { useEffect, useMemo, useState, Suspense } from "react"
 import { FilterSortBar } from "./_components/FilterSortBar"
 import { ProductCard } from "./_components/ProductCard"
 import { ProductSkeleton } from "./_components/ProductSkeleton"
+import { PaginationComponent } from "./_components/Pagination"
 
 const ITEMS_PER_PAGE = 8
 
@@ -157,105 +149,6 @@ function PageContent() {
         )}
       </main>
     </div>
-  )
-}
-
-function PaginationComponent({
-  currentPage,
-  totalPages,
-  onPageChange,
-}: {
-  currentPage: number
-  totalPages: number
-  onPageChange: (page: number) => void
-}) {
-  const getPageNumbers = () => {
-    const pages = []
-    const maxVisible = 5
-
-    if (totalPages <= maxVisible) {
-      for (let i = 1; i <= totalPages; i++) {
-        pages.push(i)
-      }
-    } else {
-      pages.push(1)
-
-      const startPage = Math.max(2, currentPage - 1)
-      const endPage = Math.min(totalPages - 1, currentPage + 1)
-
-      if (startPage > 2) {
-        pages.push("...")
-      }
-
-      for (let i = startPage; i <= endPage; i++) {
-        pages.push(i)
-      }
-
-      if (endPage < totalPages - 1) {
-        pages.push("...")
-      }
-
-      pages.push(totalPages)
-    }
-
-    return pages
-  }
-
-  return (
-    <Pagination>
-      <PaginationContent>
-        <PaginationItem>
-          <PaginationPrevious
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              if (currentPage > 1) {
-                onPageChange(currentPage - 1)
-              }
-            }}
-            className={
-              currentPage === 1 ? "pointer-events-none opacity-50" : ""
-            }
-          />
-        </PaginationItem>
-
-        {getPageNumbers().map((page, idx) => (
-          <PaginationItem key={idx}>
-            {page === "..." ? (
-              <PaginationEllipsis />
-            ) : (
-              <PaginationLink
-                href="#"
-                isActive={currentPage === page}
-                onClick={(e) => {
-                  e.preventDefault()
-                  if (typeof page === "number") {
-                    onPageChange(page)
-                  }
-                }}
-              >
-                {page}
-              </PaginationLink>
-            )}
-          </PaginationItem>
-        ))}
-
-        <PaginationItem>
-          <PaginationNext
-            href="#"
-            onClick={(e) => {
-              e.preventDefault()
-              if (currentPage < totalPages) {
-                onPageChange(currentPage + 1)
-              }
-            }}
-            className={
-              currentPage === totalPages ? "pointer-events-none opacity-50" : ""
-            }
-          />
-        </PaginationItem>
-      </PaginationContent>
-    </Pagination>
   )
 }
 
