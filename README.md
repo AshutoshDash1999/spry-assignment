@@ -29,6 +29,8 @@ Comprehensive task management system with CRUD operations, filtering, sorting, a
 
 **Screenshots:**
 <!-- Add screenshots here -->
+<img width="1920" height="881" alt="image" src="https://github.com/user-attachments/assets/9352230c-37ab-40e7-9baf-382f86b441d1" />
+
 
 ### 2. E-Commerce Product Listing Page
 
@@ -54,13 +56,15 @@ Feature-rich product browsing experience with filtering, sorting, and favorites 
 
 **Screenshots:**
 <!-- Add screenshots here -->
+<img width="1920" height="1127" alt="image" src="https://github.com/user-attachments/assets/5777e334-1124-464f-87bb-c5d4b6f7044e" />
+
 
 ## Deployment
 
-| Project | Status | URL |
-|---------|--------|-----|
-| Task Dashboard | ![Status Badge] | [Live Demo](https://spry-assignment.netlify.app/) |
-| E-Commerce | ![Status Badge] | [Live Demo](https://spry-assignment.netlify.app/) |
+| Project | URL |
+|---------|-----|
+| Task Dashboard | [Live Demo](https://spry-assignment.netlify.app/todo) |
+| E-Commerce | [Live Demo](https://spry-assignment.netlify.app/) |
 
 ## Setup
 
