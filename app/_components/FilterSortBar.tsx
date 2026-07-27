@@ -26,7 +26,7 @@ export function FilterSortBar({
   onRatingChange,
   onSortChange,
 }: FilterSortBarProps) {
-  const ratings = ["All", "4+", "4.5+", "4.7+"]
+  const ratings = ["All", "2+", "3+", "4+"]
 
   return (
     <div className="sticky top-0 z-10 border-b border-border bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
@@ -67,7 +67,11 @@ export function FilterSortBar({
           <Select value={sortBy} onValueChange={onSortChange}>
             <SelectTrigger className="w-fit sm:w-48">
               <SelectValue placeholder="Sort by price">
-                {sortBy === "asc" ? "Price: Low to High" : sortBy === "desc" ? "Price: High to Low" : "Sort by price"}
+                {sortBy === "asc"
+                  ? "Price: Low to High"
+                  : sortBy === "desc"
+                    ? "Price: High to Low"
+                    : "Sort by price"}
               </SelectValue>
             </SelectTrigger>
             <SelectContent>
