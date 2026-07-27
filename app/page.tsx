@@ -25,6 +25,7 @@ export default function Page() {
   const [selectedRating, setSelectedRating] = useState("All")
   const [sortBy, setSortBy] = useState<"asc" | "desc">("asc")
   const [currentPage, setCurrentPage] = useState(1)
+  const viewMode = searchParams.get("view") || "products"
 
   useEffect(() => {
     const pageParam = searchParams.get("page")
@@ -55,13 +56,15 @@ export default function Page() {
   }
 
   const filteredAndSortedProducts = useMemo(() => {
-    let filtered = products
+    let filtered = viewMode === "favorites"
+      ? products.filter((p) => favorites.has(p.id))
+      : products
 
-    if (selectedCategory) {
+    if (selectedCategory && viewMode !== "favorites") {
       filtered = filtered.filter((p) => p.category === selectedCategory)
     }
 
-    if (selectedRating !== "All") {
+    if (selectedRating !== "All" && viewMode !== "favorites") {
       const minRating = parseFloat(selectedRating)
       filtered = filtered.filter((p) => p.rating >= minRating)
     }
@@ -71,7 +74,7 @@ export default function Page() {
     })
 
     return filtered
-  }, [selectedCategory, selectedRating, sortBy])
+  }, [selectedCategory, selectedRating, sortBy, viewMode, favorites])
 
   const toggleFavorite = (id: number) => {
     setFavorites((prev) => {
@@ -108,18 +111,22 @@ export default function Page() {
 
   return (
     <div className="min-h-svh bg-background">
-      <FilterSortBar
-        selectedCategory={selectedCategory}
-        selectedRating={selectedRating}
-        sortBy={sortBy}
-        onCategoryChange={handleCategoryChange}
-        onRatingChange={handleRatingChange}
-        onSortChange={handleSortChange}
-      />
+      {viewMode !== "favorites" && (
+        <FilterSortBar
+          selectedCategory={selectedCategory}
+          selectedRating={selectedRating}
+          sortBy={sortBy}
+          onCategoryChange={handleCategoryChange}
+          onRatingChange={handleRatingChange}
+          onSortChange={handleSortChange}
+        />
+      )}
 
       <main className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
         <div className="mb-6">
-          <h1 className="text-3xl font-bold">Products</h1>
+          <h1 className="text-3xl font-bold">
+            {viewMode === "favorites" ? "Favorites" : "Products"}
+          </h1>
         </div>
 
         {filteredAndSortedProducts.length > 0 ? (
@@ -130,12 +137,13 @@ export default function Page() {
                   (currentPage - 1) * ITEMS_PER_PAGE,
                   currentPage * ITEMS_PER_PAGE
                 )
-                .map((product) => (
+                .map((product, idx) => (
                   <ProductCard
                     key={product.id}
                     product={product}
                     isFavorited={favorites.has(product.id)}
                     onToggleFavorite={toggleFavorite}
+                    index={idx}
                   />
                 ))}
             </div>
