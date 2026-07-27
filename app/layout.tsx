@@ -2,14 +2,15 @@
 
 import { Geist_Mono, Inter } from "next/font/google"
 
-import "./globals.css"
-import { ThemeProvider } from "@/components/theme-provider"
 import { Header } from "@/app/_components/Header"
 import { TodoHeader } from "@/app/todo/_components/TodoHeader"
+import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
-import { usePathname } from "next/navigation";
+import { usePathname } from "next/navigation"
+import { Toaster } from "react-hot-toast"
+import "./globals.css"
 
-const inter = Inter({subsets:['latin'],variable:'--font-sans'})
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" })
 
 const fontMono = Geist_Mono({
   subsets: ["latin"],
@@ -28,10 +29,16 @@ export default function RootLayout({
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn("antialiased", fontMono.variable, "font-sans", inter.variable)}
+      className={cn(
+        "antialiased",
+        fontMono.variable,
+        "font-sans",
+        inter.variable
+      )}
     >
       <body>
         <ThemeProvider>
+          <Toaster />
           {isTodoPage ? <TodoHeader /> : <Header />}
           {children}
         </ThemeProvider>

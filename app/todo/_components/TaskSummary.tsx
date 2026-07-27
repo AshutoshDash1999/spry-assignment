@@ -1,11 +1,29 @@
 "use client"
 
+import { motion } from "motion/react"
+
 import { Card, CardContent } from "@/components/ui/card"
 import type { Task } from "@/lib/task-store"
 
 interface TaskSummaryProps {
   tasks: Task[]
 }
+
+const container = {
+  hidden: {},
+  show: {
+    transition: { staggerChildren: 0.08 },
+  },
+}
+
+const item = {
+  hidden: { opacity: 0, y: 12 },
+  show: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.35, ease: "easeOut" },
+  },
+} as const
 
 export function TaskSummary({ tasks }: TaskSummaryProps) {
   const pending = tasks.filter((t) => t.status === "Pending").length
@@ -20,20 +38,27 @@ export function TaskSummary({ tasks }: TaskSummaryProps) {
   ]
 
   return (
-    <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
+    <motion.div
+      className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4"
+      variants={container}
+      initial="hidden"
+      animate="show"
+    >
       {stats.map((stat) => (
-        <Card key={stat.label} size="sm">
-          <CardContent className="flex flex-col gap-1.5">
-            <div className="flex items-center gap-2">
-              <span className={`size-2 rounded-full ${stat.dot}`} />
-              <span className="text-sm text-muted-foreground">
-                {stat.label}
-              </span>
-            </div>
-            <span className="text-3xl font-bold">{stat.count}</span>
-          </CardContent>
-        </Card>
+        <motion.div key={stat.label} variants={item}>
+          <Card size="sm">
+            <CardContent className="flex flex-col gap-1.5">
+              <div className="flex items-center gap-2">
+                <span className={`size-2 rounded-full ${stat.dot}`} />
+                <span className="text-sm text-muted-foreground">
+                  {stat.label}
+                </span>
+              </div>
+              <span className="text-3xl font-bold">{stat.count}</span>
+            </CardContent>
+          </Card>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   )
 }
