@@ -12,13 +12,14 @@ import {
 import { products } from "@/lib/products"
 import { useFavoritesStore } from "@/lib/store"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState, Suspense } from "react"
 import { FilterSortBar } from "./_components/FilterSortBar"
 import { ProductCard } from "./_components/ProductCard"
+import { ProductSkeleton } from "./_components/ProductSkeleton"
 
 const ITEMS_PER_PAGE = 8
 
-export default function Page() {
+function PageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const favorites = useFavoritesStore((state) => state.favorites)
@@ -255,5 +256,13 @@ function PaginationComponent({
         </PaginationItem>
       </PaginationContent>
     </Pagination>
+  )
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<ProductSkeleton />}>
+      <PageContent />
+    </Suspense>
   )
 }
